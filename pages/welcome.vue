@@ -4,13 +4,13 @@
       class="container flex flex-col justify-center align-center gap-8 h-[90vh] max-w-[80rem] px-6 m-auto"
     >
       <div class="w-full flex flex-col items-center align-center gap-4">
-        <div class="text-6xl">🏋️‍♂️</div>
+        <MaterialSymbolsFitnessCenter class="text-6xl text-blue-600" />
         <h1 class="text-3xl font-bold text-center">Fit Tracker</h1>
         <p class="text-gray-600 text-center">Tu aplicación personal de seguimiento de entrenamientos</p>
       </div>
       
       <div class="flex flex-col justify-center gap-2 text-center">
-        <h2 class="text-2xl font-semibold">¡Bienvenido! 💪</h2>
+        <h2 class="text-2xl font-semibold flex items-center justify-center gap-2">¡Bienvenido! <MaterialSymbolsExercise class="text-orange-600" /></h2>
         <span class="text-gray-600 text-lg">Inicia sesión para comenzar a trackear tus entrenamientos</span>
       </div>
       
@@ -37,9 +37,9 @@
       </div>
       
       <div class="text-center text-sm text-gray-500">
-        <p>🏃‍♂️ Trackea tus entrenamientos de gimnasio</p>
-        <p>⏱️ Registra tus tiempos de running</p>
-        <p>📊 Visualiza tu progreso y récords personales</p>
+        <p class="flex items-center justify-center gap-2"><MaterialSymbolsDirectionsRun class="text-green-600" /> Trackea tus entrenamientos de gimnasio</p>
+        <p class="flex items-center justify-center gap-2"><MaterialSymbolsTimer class="text-blue-600" /> Registra tus tiempos de running</p>
+        <p class="flex items-center justify-center gap-2"><MaterialSymbolsBarChartRounded class="text-purple-600" /> Visualiza tu progreso y récords personales</p>
       </div>
     </div>
   </div>
@@ -47,6 +47,11 @@
 
 <script setup>
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import MaterialSymbolsFitnessCenter from "~icons/material-symbols/fitness-center";
+import MaterialSymbolsExercise from "~icons/material-symbols/exercise";
+import MaterialSymbolsDirectionsRun from "~icons/material-symbols/directions-run";
+import MaterialSymbolsTimer from "~icons/material-symbols/timer";
+import MaterialSymbolsBarChartRounded from "~icons/material-symbols/bar-chart-rounded";
 
 definePageMeta({
   layout: false

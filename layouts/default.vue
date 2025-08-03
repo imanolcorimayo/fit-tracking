@@ -7,24 +7,28 @@
           <!-- Logo/Title -->
           <div class="flex items-center">
             <NuxtLink to="/gym" class="flex items-center space-x-2">
-              <span class="text-2xl">🏋️‍♂️</span>
+              <MaterialSymbolsFitnessCenter class="text-2xl text-blue-600" />
               <span class="text-xl font-semibold text-gray-900">Fit Tracker</span>
             </NuxtLink>
           </div>
 
           <!-- Navigation Menu -->
           <nav class="hidden md:flex items-center space-x-8">
-            <NuxtLink to="/gym" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              🏋️‍♂️ Gimnasio
+            <NuxtLink to="/gym" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1">
+              <MaterialSymbolsFitnessCenter class="text-base" />
+              Gimnasio
             </NuxtLink>
-            <NuxtLink to="/running" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
-              🏃‍♂️ Running
+            <NuxtLink to="/running" class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1">
+              <MaterialSymbolsDirectionsRun class="text-base" />
+              Running
             </NuxtLink>
-            <NuxtLink to="/stats" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">
-              📊 Estadísticas
+            <NuxtLink to="/stats" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1">
+              <MaterialSymbolsBarChartRounded class="text-base" />
+              Estadísticas
             </NuxtLink>
-            <NuxtLink to="/exercises" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-              💪 Ejercicios
+            <NuxtLink to="/exercises" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1">
+              <MaterialSymbolsExercise class="text-base" />
+              Ejercicios
             </NuxtLink>
           </nav>
 
@@ -61,17 +65,21 @@
         <!-- Mobile Navigation Menu -->
         <div v-show="mobileMenuOpen" class="md:hidden">
           <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <NuxtLink to="/gym" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600">
-              🏋️‍♂️ Gimnasio
+            <NuxtLink to="/gym" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 flex items-center gap-2">
+              <MaterialSymbolsFitnessCenter class="text-lg" />
+              Gimnasio
             </NuxtLink>
-            <NuxtLink to="/running" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600">
-              🏃‍♂️ Running
+            <NuxtLink to="/running" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 flex items-center gap-2">
+              <MaterialSymbolsDirectionsRun class="text-lg" />
+              Running
             </NuxtLink>
-            <NuxtLink to="/stats" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600">
-              📊 Estadísticas
+            <NuxtLink to="/stats" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 flex items-center gap-2">
+              <MaterialSymbolsBarChartRounded class="text-lg" />
+              Estadísticas
             </NuxtLink>
-            <NuxtLink to="/exercises" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600">
-              💪 Ejercicios
+            <NuxtLink to="/exercises" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 flex items-center gap-2">
+              <MaterialSymbolsExercise class="text-lg" />
+              Ejercicios
             </NuxtLink>
           </div>
         </div>
@@ -87,6 +95,10 @@
 
 <script setup>
 import { signOut as firebaseSignOut } from "firebase/auth";
+import MaterialSymbolsFitnessCenter from "~icons/material-symbols/fitness-center";
+import MaterialSymbolsDirectionsRun from "~icons/material-symbols/directions-run";
+import MaterialSymbolsBarChartRounded from "~icons/material-symbols/bar-chart-rounded";
+import MaterialSymbolsExercise from "~icons/material-symbols/exercise";
 
 const user = useCurrentUser();
 const auth = useFirebaseAuth();

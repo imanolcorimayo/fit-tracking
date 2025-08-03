@@ -17,5 +17,5 @@ export const useCurrentUser = () => {
     }
   }
 
-  return user;
+  return { user};
 };
