@@ -1,0 +1,54 @@
+export default defineNuxtRouteMiddleware(async (to, from) => {
+  // Skip middleware on server-side rendering to prevent blocking
+  if (import.meta.server) {
+    return;
+  }
+
+  console.log('🔐 Auth middleware running for:', to.path);
+  
+  // Define public routes that don't require authentication
+  const publicRoutes = [
+    "/welcome", // Login page
+    "/test", // Test page for debugging
+  ];
+
+  // Check if the current route is a public route
+  const isPublicRoute = publicRoutes.some((route) => to.path === route || to.path.startsWith(`${route}/`));
+
+  // Allow access to public routes without authentication
+  if (isPublicRoute) {
+    console.log('✅ Public route, allowing access');
+    return;
+  }
+
+  console.log('🖥️ Client side auth check');
+  
+  try {
+    const user = await getCurrentUser();
+    console.log('👤 User:', user ? 'authenticated' : 'not authenticated');
+
+    // Redirect to welcome page for private routes without authentication
+    if (!user) {
+      console.log('🚫 No user, redirecting to welcome');
+      return navigateTo({
+        path: "/welcome",
+        query: {
+          redirect: to.fullPath
+        }
+      });
+    }
+
+    // Redirect root path to gym page for authenticated users
+    if (to.path === '/') {
+      console.log('🏠 Root path, redirecting to /gym');
+      return navigateTo('/gym');
+    }
+
+    console.log('✅ User authenticated, allowing access');
+    // User is authenticated, allow access to protected routes
+    return;
+  } catch (error) {
+    console.error('❌ Auth middleware error:', error);
+    return navigateTo('/welcome');
+  }
+});
