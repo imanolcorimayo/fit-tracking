@@ -43,24 +43,59 @@
           </div>
         </div>
 
+        <!-- Calculation Mode Selection -->
+        <div class="bg-gray-50 p-3 rounded-lg">
+          <label class="block text-sm font-medium text-gray-700 mb-2">¿Qué campo calcular automáticamente?</label>
+          <div class="flex gap-4 text-sm">
+            <label class="flex items-center cursor-pointer">
+              <input 
+                v-model="calculationMode" 
+                type="radio" 
+                value="distance" 
+                class="mr-2"
+              >
+              <span>Calcular Distancia</span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input 
+                v-model="calculationMode" 
+                type="radio" 
+                value="duration" 
+                class="mr-2"
+              >
+              <span>Calcular Duración</span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input 
+                v-model="calculationMode" 
+                type="radio" 
+                value="pace" 
+                class="mr-2"
+              >
+              <span>Calcular Pace</span>
+            </label>
+          </div>
+        </div>
+
         <!-- Basic Metrics -->
         <div class="grid grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Distancia (km)
-              <span v-if="calculatedTotals.distance && formData.type === 'tempo' && tempoType === 'variable'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
+              <span v-if="calculationMode === 'distance'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
             </label>
             <input 
               v-model.number="formData.distance"
-              :readonly="formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.distance"
+              @input="updateCalculations"
+              :readonly="calculationMode === 'distance'"
               type="number" 
               min="0"
               step="0.01"
               placeholder="5.0"
               :class="[
                 'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500',
-                formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.distance 
-                  ? 'bg-blue-50 border-blue-300 text-blue-800' 
+                calculationMode === 'distance' 
+                  ? 'bg-blue-50 border-blue-300 text-blue-800 cursor-not-allowed' 
                   : 'border-gray-300'
               ]"
             >
@@ -68,18 +103,19 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Duración (min)
-              <span v-if="calculatedTotals.duration && formData.type === 'tempo' && tempoType === 'variable'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
+              <span v-if="calculationMode === 'duration'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
             </label>
             <input 
               v-model.number="formData.duration"
-              :readonly="formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.duration"
+              @input="updateCalculations"
+              :readonly="calculationMode === 'duration'"
               type="number" 
               min="1"
               placeholder="30"
               :class="[
                 'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500',
-                formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.duration 
-                  ? 'bg-blue-50 border-blue-300 text-blue-800' 
+                calculationMode === 'duration' 
+                  ? 'bg-blue-50 border-blue-300 text-blue-800 cursor-not-allowed' 
                   : 'border-gray-300'
               ]"
             >
@@ -87,19 +123,20 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Pace Promedio
-              <span v-if="calculatedTotals.averagePace && formData.type === 'tempo' && tempoType === 'variable'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
+              <span v-if="calculationMode === 'pace'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
             </label>
             <input 
               v-model="formData.average_pace"
-              :readonly="formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.averagePace"
+              @input="updateCalculations"
+              :readonly="calculationMode === 'pace'"
               type="text" 
               placeholder="5:30"
               pattern="[0-9]+:[0-5][0-9]"
               title="Formato: mm:ss (ej: 5:30)"
               :class="[
                 'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500',
-                formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.averagePace 
-                  ? 'bg-blue-50 border-blue-300 text-blue-800' 
+                calculationMode === 'pace' 
+                  ? 'bg-blue-50 border-blue-300 text-blue-800 cursor-not-allowed' 
                   : 'border-gray-300'
               ]"
             >
@@ -237,6 +274,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Distancia por Intervalo (m)</label>
               <input 
                 v-model.number="formData.intervals.distance"
+                @input="updateGlobalCalculationsFromIntervals"
                 type="number" 
                 min="100"
                 step="50"
@@ -248,6 +286,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Repeticiones</label>
               <input 
                 v-model.number="formData.intervals.repetitions"
+                @input="updateGlobalCalculationsFromIntervals"
                 type="number" 
                 min="1"
                 placeholder="8"
@@ -258,6 +297,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo por Intervalo</label>
               <input 
                 v-model="formData.intervals.time"
+                @input="updateGlobalCalculationsFromIntervals"
                 type="text" 
                 placeholder="1:30"
                 pattern="[0-9]+:[0-5][0-9]"
@@ -294,6 +334,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Distancia Oficial (km)</label>
               <select 
                 v-model.number="formData.race.distance"
+                @change="updateGlobalCalculationsFromRace"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <option value="5">5K</option>
@@ -308,6 +349,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo Oficial</label>
               <input 
                 v-model="formData.race.official_time"
+                @input="updateGlobalCalculationsFromRace"
                 type="text" 
                 placeholder="1:45:30"
                 pattern="[0-9]+:[0-5][0-9]:[0-5][0-9]"
@@ -400,6 +442,7 @@ const emit = defineEmits(['close', 'success'])
 const runningStore = useRunningStore()
 const loading = ref(false)
 const tempoType = ref('single')
+const calculationMode = ref('distance') // Which field to calculate automatically
 
 // Track which fields are calculated automatically
 const calculatedSegments = ref(new Set())
@@ -507,10 +550,10 @@ const updateSegmentCalculations = (index, changedField) => {
   updateTotalCalculations()
 }
 
-// Update total calculations based on segments
+// Update total calculations based on segments (for tempo variable)
 const updateTotalCalculations = () => {
   if (formData.value.type !== 'tempo' || tempoType.value !== 'variable') {
-    calculatedTotals.value = { distance: false, duration: false, averagePace: false }
+    // Don't auto-calculate for other types here - they have their own handlers
     return
   }
 
@@ -542,6 +585,111 @@ const updateTotalCalculations = () => {
   }
 }
 
+// New simplified calculation handler
+const updateCalculations = () => {
+  // Don't auto-calculate if we're in tempo variable mode (handled separately)
+  if (formData.value.type === 'tempo' && tempoType.value === 'variable') {
+    return
+  }
+
+  const { distance, duration, average_pace } = formData.value
+
+  // Calculate based on selected mode
+  if (calculationMode.value === 'distance') {
+    // Calculate distance from duration + pace
+    if (duration && average_pace) {
+      const calculatedDistance = calculateDistance(duration, average_pace)
+      if (calculatedDistance) {
+        formData.value.distance = calculatedDistance
+      }
+    }
+  } else if (calculationMode.value === 'duration') {
+    // Calculate duration from distance + pace
+    if (distance && average_pace) {
+      const calculatedDuration = calculateTime(distance, average_pace)
+      if (calculatedDuration) {
+        formData.value.duration = calculatedDuration
+      }
+    }
+  } else if (calculationMode.value === 'pace') {
+    // Calculate pace from distance + duration
+    if (distance && duration) {
+      const calculatedPace = calculatePace(distance, duration)
+      if (calculatedPace) {
+        formData.value.average_pace = calculatedPace
+      }
+    }
+  }
+}
+
+// Calculate globals from intervals data
+const updateGlobalCalculationsFromIntervals = () => {
+  const { distance, repetitions, time } = formData.value.intervals
+  
+  if (distance && repetitions && time) {
+    // Calculate total distance (convert meters to km)
+    const totalDistance = (distance * repetitions) / 1000
+    formData.value.distance = Math.round(totalDistance * 100) / 100
+    calculatedTotals.value.distance = true
+
+    // Calculate total duration (convert time per interval to total minutes)
+    const timeMinutes = time.split(':').reduce((acc, time) => (60 * acc) + +time, 0) / 60
+    const totalDuration = timeMinutes * repetitions
+    formData.value.duration = Math.round(totalDuration * 100) / 100
+    calculatedTotals.value.duration = true
+
+    // Calculate average pace (same as interval pace for this type)
+    const distanceKm = distance / 1000
+    const avgPace = calculatePace(distanceKm, timeMinutes)
+    if (avgPace) {
+      formData.value.average_pace = avgPace
+      calculatedTotals.value.averagePace = true
+    }
+  }
+}
+
+// Convert race time format (h:mm:ss) to minutes
+const raceTimeToMinutes = (timeStr) => {
+  if (!timeStr || !timeStr.includes(':')) return null
+  
+  const parts = timeStr.split(':').map(Number)
+  if (parts.length === 3) {
+    // h:mm:ss format
+    const [hours, minutes, seconds] = parts
+    return hours * 60 + minutes + seconds / 60
+  } else if (parts.length === 2) {
+    // mm:ss format
+    const [minutes, seconds] = parts
+    return minutes + seconds / 60
+  }
+  return null
+}
+
+// Calculate globals from race data
+const updateGlobalCalculationsFromRace = () => {
+  const { distance, official_time } = formData.value.race
+  
+  if (distance && official_time) {
+    // Set distance
+    formData.value.distance = distance
+    calculatedTotals.value.distance = true
+
+    // Calculate duration
+    const durationMinutes = raceTimeToMinutes(official_time)
+    if (durationMinutes) {
+      formData.value.duration = Math.round(durationMinutes * 100) / 100
+      calculatedTotals.value.duration = true
+
+      // Calculate average pace
+      const avgPace = calculatePace(distance, durationMinutes)
+      if (avgPace) {
+        formData.value.average_pace = avgPace
+        calculatedTotals.value.averagePace = true
+      }
+    }
+  }
+}
+
 const resetForm = () => {
   formData.value = {
     date: new Date().toISOString().split('T')[0],
@@ -566,6 +714,7 @@ const resetForm = () => {
     perceived_effort: 5
   }
   tempoType.value = 'single'
+  calculationMode.value = 'distance'
   calculatedSegments.value.clear()
   calculatedTotals.value = { distance: false, duration: false, averagePace: false }
 }
@@ -646,4 +795,28 @@ watch(tempoType, (newType) => {
 watch(() => formData.value.tempo_segments, () => {
   updateTotalCalculations()
 }, { deep: true })
+
+// Watch for changes in workout type to clear calculations
+watch(() => formData.value.type, () => {
+  calculatedTotals.value = { distance: false, duration: false, averagePace: false }
+})
+
+// Watch for changes in intervals data
+watch(() => formData.value.intervals, () => {
+  if (formData.value.type === 'intervals') {
+    updateGlobalCalculationsFromIntervals()
+  }
+}, { deep: true })
+
+// Watch for changes in race data
+watch(() => formData.value.race, () => {
+  if (formData.value.type === 'race') {
+    updateGlobalCalculationsFromRace()
+  }
+}, { deep: true })
+
+// Watch for changes in calculation mode to trigger recalculation
+watch(calculationMode, () => {
+  updateCalculations()
+})
 </script>
