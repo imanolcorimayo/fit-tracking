@@ -46,36 +46,186 @@
         <!-- Basic Metrics -->
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Distancia (km)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Distancia (km)
+              <span v-if="calculatedTotals.distance && formData.type === 'tempo' && tempoType === 'variable'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
+            </label>
             <input 
               v-model.number="formData.distance"
+              :readonly="formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.distance"
               type="number" 
               min="0"
-              step="0.1"
+              step="0.01"
               placeholder="5.0"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              :class="[
+                'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500',
+                formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.distance 
+                  ? 'bg-blue-50 border-blue-300 text-blue-800' 
+                  : 'border-gray-300'
+              ]"
             >
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Duración (min)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Duración (min)
+              <span v-if="calculatedTotals.duration && formData.type === 'tempo' && tempoType === 'variable'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
+            </label>
             <input 
               v-model.number="formData.duration"
+              :readonly="formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.duration"
               type="number" 
               min="1"
               placeholder="30"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              :class="[
+                'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500',
+                formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.duration 
+                  ? 'bg-blue-50 border-blue-300 text-blue-800' 
+                  : 'border-gray-300'
+              ]"
             >
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Pace Promedio</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Pace Promedio
+              <span v-if="calculatedTotals.averagePace && formData.type === 'tempo' && tempoType === 'variable'" class="text-blue-600 text-xs ml-1">📊 Calculado</span>
+            </label>
             <input 
               v-model="formData.average_pace"
+              :readonly="formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.averagePace"
               type="text" 
               placeholder="5:30"
               pattern="[0-9]+:[0-5][0-9]"
               title="Formato: mm:ss (ej: 5:30)"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              :class="[
+                'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500',
+                formData.type === 'tempo' && tempoType === 'variable' && calculatedTotals.averagePace 
+                  ? 'bg-blue-50 border-blue-300 text-blue-800' 
+                  : 'border-gray-300'
+              ]"
             >
+          </div>
+        </div>
+
+        <!-- Tempo Training (only for tempo type) -->
+        <div v-if="formData.type === 'tempo'" class="bg-blue-50 p-4 rounded-lg">
+          <h3 class="text-lg font-medium text-blue-800 mb-4">Detalles del Tempo</h3>
+          
+          <!-- Tempo Type Selection -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Tempo</label>
+            <div class="flex gap-4">
+              <label class="flex items-center">
+                <input 
+                  v-model="tempoType" 
+                  type="radio" 
+                  value="single" 
+                  class="mr-2"
+                >
+                <span class="text-sm">Pace Único</span>
+              </label>
+              <label class="flex items-center">
+                <input 
+                  v-model="tempoType" 
+                  type="radio" 
+                  value="variable" 
+                  class="mr-2"
+                >
+                <span class="text-sm">Pace Variable (Fondo)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Variable Pace Segments -->
+          <div v-if="tempoType === 'variable'">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-medium text-gray-700">Segmentos</span>
+              <button 
+                type="button"
+                @click="addTempoSegment"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+              >
+                <IcRoundPlus class="text-sm" />
+                Agregar Segmento
+              </button>
+            </div>
+
+            <div v-if="formData.tempo_segments.length === 0" class="text-gray-500 text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
+              Agrega segmentos para tu entrenamiento de fondo
+            </div>
+
+            <div v-else class="space-y-3">
+              <div 
+                v-for="(segment, index) in formData.tempo_segments" 
+                :key="index"
+                class="border border-gray-200 rounded-lg p-3 bg-white"
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <span class="font-medium text-sm">Segmento {{ index + 1 }}</span>
+                  <button 
+                    type="button"
+                    @click="removeTempoSegment(index)"
+                    class="text-red-600 hover:text-red-800 px-2 py-1"
+                  >
+                    <MaterialSymbolsClose class="text-sm" />
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Duración (min)</label>
+                    <input 
+                      v-model.number="segment.duration"
+                      @input="updateSegmentCalculations(index, 'duration')"
+                      type="number" 
+                      min="1"
+                      placeholder="15"
+                      required
+                      class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                    >
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Pace (min/km)</label>
+                    <input 
+                      v-model="segment.pace"
+                      @input="updateSegmentCalculations(index, 'pace')"
+                      type="text" 
+                      placeholder="4:30"
+                      pattern="[0-9]+:[0-5][0-9]"
+                      required
+                      class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                    >
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">
+                      Distancia (km)
+                      <span v-if="isDistanceCalculated(index)" class="text-blue-600 text-xs ml-1">📊</span>
+                    </label>
+                    <input 
+                      v-model.number="segment.distance"
+                      @input="updateSegmentCalculations(index, 'distance')"
+                      type="number" 
+                      min="0"
+                      step="0.01"
+                      placeholder="3.5"
+                      :class="[
+                        'w-full px-2 py-1 border rounded text-sm',
+                        isDistanceCalculated(index) ? 'border-blue-300 bg-blue-50' : 'border-gray-300'
+                      ]"
+                    >
+                  </div>
+                </div>
+
+                <div class="mt-2">
+                  <label class="block text-xs text-gray-600 mb-1">Notas del segmento</label>
+                  <input 
+                    v-model="segment.notes"
+                    type="text" 
+                    placeholder="Sensaciones, condiciones..."
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  >
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -231,6 +381,9 @@
 </template>
 
 <script setup>
+import IcRoundPlus from "~icons/ic/round-plus";
+import MaterialSymbolsClose from "~icons/material-symbols/close";
+
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -246,6 +399,15 @@ const emit = defineEmits(['close', 'success'])
 
 const runningStore = useRunningStore()
 const loading = ref(false)
+const tempoType = ref('single')
+
+// Track which fields are calculated automatically
+const calculatedSegments = ref(new Set())
+const calculatedTotals = ref({
+  distance: false,
+  duration: false,
+  averagePace: false
+})
 
 const formData = ref({
   date: new Date().toISOString().split('T')[0],
@@ -259,6 +421,7 @@ const formData = ref({
     rest_time: '',
     repetitions: null
   },
+  tempo_segments: [],
   race: {
     name: '',
     distance: null,
@@ -280,6 +443,105 @@ const formTitle = computed(() => {
   return titles[formData.value.type] || 'Nueva Sesión de Running'
 })
 
+const addTempoSegment = () => {
+  formData.value.tempo_segments.push({
+    duration: null,
+    distance: null,
+    pace: '',
+    notes: ''
+  })
+}
+
+const removeTempoSegment = (index) => {
+  formData.value.tempo_segments.splice(index, 1)
+  calculatedSegments.value.delete(`${index}-distance`)
+  updateTotalCalculations()
+}
+
+// Import pace calculation utilities
+const { 
+  calculateDistance, 
+  calculatePace, 
+  calculateTime,
+  calculateAveragePace,
+  calculateTotalDistance,
+  calculateTotalTime
+} = await import('~/utils/paceCalculations')
+
+// Check if a segment's distance is calculated
+const isDistanceCalculated = (index) => {
+  return calculatedSegments.value.has(`${index}-distance`)
+}
+
+// Update calculations for a specific segment
+const updateSegmentCalculations = (index, changedField) => {
+  const segment = formData.value.tempo_segments[index]
+  if (!segment) return
+
+  // Clear any previous calculation flags for this segment
+  calculatedSegments.value.delete(`${index}-distance`)
+  calculatedSegments.value.delete(`${index}-pace`)
+  calculatedSegments.value.delete(`${index}-duration`)
+
+  if (changedField === 'duration' || changedField === 'pace') {
+    // If we have duration and pace, calculate distance
+    if (segment.duration && segment.pace) {
+      const calculatedDistance = calculateDistance(segment.duration, segment.pace)
+      if (calculatedDistance) {
+        segment.distance = calculatedDistance
+        calculatedSegments.value.add(`${index}-distance`)
+      }
+    }
+  } else if (changedField === 'distance') {
+    // If distance was manually changed, don't auto-calculate it anymore
+    if (segment.duration && segment.distance) {
+      const calculatedPace = calculatePace(segment.distance, segment.duration)
+      if (calculatedPace) {
+        segment.pace = calculatedPace
+        calculatedSegments.value.add(`${index}-pace`)
+      }
+    }
+  }
+
+  // Update totals after any segment change
+  updateTotalCalculations()
+}
+
+// Update total calculations based on segments
+const updateTotalCalculations = () => {
+  if (formData.value.type !== 'tempo' || tempoType.value !== 'variable') {
+    calculatedTotals.value = { distance: false, duration: false, averagePace: false }
+    return
+  }
+
+  const segments = formData.value.tempo_segments
+  if (!segments || segments.length === 0) {
+    calculatedTotals.value = { distance: false, duration: false, averagePace: false }
+    return
+  }
+
+  // Calculate total distance
+  const totalDistance = calculateTotalDistance(segments)
+  if (totalDistance > 0) {
+    formData.value.distance = totalDistance
+    calculatedTotals.value.distance = true
+  }
+
+  // Calculate total duration
+  const totalDuration = calculateTotalTime(segments)
+  if (totalDuration > 0) {
+    formData.value.duration = totalDuration
+    calculatedTotals.value.duration = true
+  }
+
+  // Calculate average pace
+  const avgPace = calculateAveragePace(segments)
+  if (avgPace) {
+    formData.value.average_pace = avgPace
+    calculatedTotals.value.averagePace = true
+  }
+}
+
 const resetForm = () => {
   formData.value = {
     date: new Date().toISOString().split('T')[0],
@@ -293,6 +555,7 @@ const resetForm = () => {
       rest_time: '',
       repetitions: null
     },
+    tempo_segments: [],
     race: {
       name: '',
       distance: null,
@@ -302,6 +565,9 @@ const resetForm = () => {
     notes: '',
     perceived_effort: 5
   }
+  tempoType.value = 'single'
+  calculatedSegments.value.clear()
+  calculatedTotals.value = { distance: false, duration: false, averagePace: false }
 }
 
 const closeForm = () => {
@@ -324,6 +590,15 @@ const submitForm = async () => {
     // Remove empty race data if not race type
     if (sessionData.type !== 'race') {
       delete sessionData.race
+    }
+    
+    // Handle tempo segments for tempo type
+    if (sessionData.type === 'tempo') {
+      if (tempoType.value === 'single' || !sessionData.tempo_segments || sessionData.tempo_segments.length === 0) {
+        delete sessionData.tempo_segments
+      }
+    } else {
+      delete sessionData.tempo_segments
     }
     
     // Remove empty strings and null values
@@ -357,4 +632,18 @@ watch(() => props.isOpen, (isOpen) => {
     formData.value.type = props.initialType
   }
 })
+
+// Add initial tempo segment when switching to tempo variable mode
+watch(tempoType, (newType) => {
+  if (newType === 'variable' && formData.value.tempo_segments.length === 0) {
+    addTempoSegment()
+  }
+  // Update calculations when switching tempo types
+  updateTotalCalculations()
+})
+
+// Watch for changes in tempo segments to update totals
+watch(() => formData.value.tempo_segments, () => {
+  updateTotalCalculations()
+}, { deep: true })
 </script>

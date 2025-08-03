@@ -17,6 +17,14 @@ export interface RunningSession extends BaseDocument {
     repetitions: number
   }
   
+  // Tempo segments for variable pace tempo workouts
+  tempo_segments?: {
+    duration: number
+    distance?: number
+    pace: string
+    notes?: string
+  }[]
+  
   // Race data
   race?: {
     name: string

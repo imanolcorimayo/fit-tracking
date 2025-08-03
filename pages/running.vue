@@ -26,6 +26,13 @@
             Carrera Fácil
           </button>
           <button 
+            @click="openFormForType('tempo')"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <MaterialSymbolsSpeed class="text-lg" />
+            Tempo/Fondo
+          </button>
+          <button 
             @click="openFormForType('intervals')"
             class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
@@ -83,6 +90,22 @@
                   <span>Esfuerzo:</span>
                   <span class="font-medium">{{ session.perceived_effort }}/10</span>
                 </div>
+                
+                <!-- Tempo Segments Display -->
+                <div v-if="session.tempo_segments && session.tempo_segments.length > 0" class="mt-2 pt-2 border-t border-gray-200">
+                  <div class="text-xs text-gray-500 mb-1">Segmentos:</div>
+                  <div class="space-y-1">
+                    <div 
+                      v-for="(segment, index) in session.tempo_segments" 
+                      :key="index"
+                      class="flex justify-between text-xs bg-blue-50 px-2 py-1 rounded"
+                    >
+                      <span>{{ index + 1 }}. {{ segment.duration }}min</span>
+                      <span class="font-medium">{{ segment.pace }} /km</span>
+                      <span v-if="segment.distance" class="text-gray-500">{{ segment.distance }}km</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div v-if="session.notes" class="text-xs text-gray-500 mt-2 truncate">
                 {{ session.notes }}
@@ -127,6 +150,7 @@
 
 <script setup>
 import MaterialSymbolsDirectionsRun from "~icons/material-symbols/directions-run";
+import MaterialSymbolsSpeed from "~icons/material-symbols/speed";
 import MaterialSymbolsFlashOn from "~icons/material-symbols/flash-on";
 import MaterialSymbolsTrophyRounded from "~icons/material-symbols/trophy-rounded";
 import MaterialSymbolsHistoryRounded from "~icons/material-symbols/history-rounded";
